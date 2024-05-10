@@ -1,0 +1,78 @@
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import toast from "react-hot-toast";
+import Loading from "./Loading";
+import { setLoading } from "../redux/reducers/rootSlice";
+import { useDispatch, useSelector } from "react-redux";
+import Empty from "./Empty";
+import fetchData from "../helper/apiCall";
+import "../styles/user.css";
+
+axios.defaults.baseURL = process.env.REACT_APP_SERVER_DOMAIN;
+
+const AdminDoctors = () => {
+  const [doctors, setDoctors] = useState([]);
+  const dispatch = useDispatch();
+  const { loading } = useSelector((state) => state.root);
+
+  const getAllDoctors = async (e) => {
+    try {
+      dispatch(setLoading(true));
+      const temp = await fetchData(`/doctor/getalldoctors`);
+      setDoctors(temp);
+      dispatch(setLoading(false));
+    } catch (error) {}
+  };
+
+  const deleteUser = async (userId) => {
+    try {
+      const confirm = window.confirm("Are you sure you want to delete?");
+      if (confirm) {
+        await toast.promise(
+          axios.put(
+            "/doctor/deletedoctor",
+            { userId },
+            {
+              headers: {
+                authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          ),
+          {
+            success: "Doctor deleted successfully",
+            error: "Unable to delete Doctor",
+            loading: "Deleting Doctor...",
+          }
+        );
+        getAllDoctors();
+      }
+    } catch (error) {
+      return error;
+    }
+  };
+
+  useEffect(() => {
+    getAllDoctors();
+  }, []);
+
+  return (
+    <>
+      <section className="user-section">
+        <h3 className="home-sub-heading">All Doctors</h3>
+       
+          <div className="user-container">
+            <table>
+              <thead>
+                
+              </thead>
+              <tbody>
+                
+              </tbody>
+            </table>
+          </div>
+        
+      </section>
+    </>
+  );
+};
+export default AdminDoctors;
